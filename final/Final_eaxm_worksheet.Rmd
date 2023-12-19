@@ -1,0 +1,145 @@
+---
+title: "Final Exam Template"
+author: "kgteller"
+date: "2023-11-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 1 Probabilities Form Random Variables
+
+For binomially distributed random variable with n=35 and p=0.43 find P(X\>22)
+
+```{r}
+
+prob <- 1 - pbinom(18, size = 25, prob = 0.63)
+prob
+```
+
+For binomially distributed random variable with n=25 and p=0.43 find P(X=22)
+
+```{r}
+prob1 <- 1 - dbinom(22, size = 25, prob = 0.43)
+prob1
+```
+
+For Poisson random variable with mean 6  find P(X=2)
+
+```{r}
+prob2 <- dpois(5, 3)
+
+prob2
+```
+
+For Poisson random variable with mean 6  find $P(X \leq 2)$
+
+```{r}
+prob3 <- ppois(5, 3)
+
+prob3
+```
+
+For normal random variable with mean 3 and standard deviation 0.75 find $P(1 \leq X < 2.1)$.
+
+```{r}
+prob4 <- pnorm(2.8, mean = 2, sd = .5) - pnorm(1, mean = 2, sd = .5)
+prob4
+```
+
+For normal random variable with mean 3 and standard deviation 0.75 find $P(X=2)$.
+
+```{r}
+prob5 <- dnorm(2, mean = 2, sd = .5)
+prob5
+```
+
+For exponential random variable with mean 2, find $P(1.1 < X \leq 2.3)$
+
+```{r}
+prob5 <- pexp(2.5, rate = 1/2) - pexp(1, rate = 1/2)
+prob5
+```
+
+## Part 2 Cancer an Well Water Data
+
+1\. Determine how many patients were diagnosed with cancer in each county.
+
+```{r}
+library("readxl")
+cancer <- read_excel("cancer_and_well_water.xlsx")
+cancer
+count <- table(cancer$County)
+count
+
+```
+
+2\. Create cross-tabulation table of county and stage of cancer patients were diagnosed with
+
+```{r}
+cross <- table(cancer$County, cancer$Stage)
+cross
+
+745
+444
+
+```
+
+3\. Find descriptive statistics of age for all patients.
+
+```{r}
+age <- as.numeric(cancer$AgeDx)
+sum <- summary(age)
+sum
+```
+
+4\. Find descriptive statistics of patients' age by stage of cancer they were diagnosed with.
+
+```{r}
+cross <- table(cancer$AgeDx, cancer$Stage)
+cross
+
+summary(cross)
+```
+
+5\. Construct 95% confidence interval for the average age of cancer patients.
+
+```{r}
+age <- as.numeric(cancer$AgeDx)
+t.test(age, conf.level = 0.95)
+
+```
+
+6\. Test a hypothesis whether average age of all cancer patients exceeds 65 at the time of diagnosis.
+
+```{r}
+t.test(age, mu = 65, alternative = "greater")
+```
+
+7\. Test a hypothesis to determine if average age of patients diagnosed at an early stage is different from average age of patients diagnosed at an advanced stage.
+
+```{r}
+
+a <- as.numeric(cancer$AgeDx[cancer$Stage == "Early"])
+b <- as.numeric(cancer$AgeDx[cancer$Stage == "Advanced"])
+t.test(a, b)
+```
+
+## Part 3 Mortgage Data and Regression
+
+1\. Create a scatter plot of mortgage rates.
+
+```{r}
+mort <- read_excel("mortgage_data.xlsx")
+mort
+```
+
+2.  Find regression equation modeling 30-year rate using 15-year rate as predictor.
+
+```{r}
+model <- lm(mort$`30 year`~mort$`15 year`)
+model
+summary(model)
+```

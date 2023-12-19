@@ -1,0 +1,355 @@
+---
+title: 'Lab 4: Continous Random Variables'
+author: "kgteller"
+date: "2023-05-31"
+output:
+  html_document:
+
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Continuous Random Variables
+
+Today we will compare samples from a continuous random variable with different sample sizes to the theoretical distribution.
+
+## The Normal Distribution
+
+the probability distribution for a random variable X that is normally distributed is defined by:
+
+$f(x)=\frac{1}{\sqrt{2 \pi} \sigma} e^{-\frac{1}{2}(\frac{x-\mu}{\sigma})^2}$ on $(-\infty,\infty)$ and $E(X)=\mu$ and $Var(x)=\sigma^2$
+
+We can plot the standard normal distribution using dnorm() in R
+
+```{r}
+x<-seq(-4,4,length=500)
+y<-dnorm(x,0,1)
+plot(x,y,type='l')
+```
+
+## Assignment 1
+
+Now create a loop that plots the normal distribution with $\mu=0$ and $\sigma= 3,5,10$.
+
+```{r}
+
+for (i in 1:11) {
+  if (i == 3)
+  {
+    x<-seq(-30,30,length=500)
+    y<-dnorm(x,0,i)
+    plot(x,y,type='l',ylim=c(0, 0.15) )
+  }
+  if (i == 5)
+  {
+    x<-seq(-30,30,length=500)
+    y<-dnorm(x,0,i)
+    plot(x,y,type='l',ylim=c(0, 0.10))
+  }
+  if(i == 10)
+  {
+    x<-seq(-30,30,length=500)
+    y<-dnorm(x,0,i)
+    plot(x,y,type='l', ylim=c(0, 0.050))
+  }
+}
+```
+
+a.  Describe how the normal probability density function changes as the standard deviation increases.
+
+    ```         
+    As standard deviation increases the distribution goes from skinny to fat.
+    ```
+
+b.  What is the maximum value of the probability density function for the normal distribution with mean 0 and standard deviation 1?
+
+    ```{r}
+        x<-seq(-5,5,length=500)
+        y<-dnorm(x,0,1)
+        plot(x,y,type='l',ylim=c(0, .50) )
+    ```
+
+    ```         
+    It is around .40
+    ```
+
+c.  What is the maximum value of the probability density function for the normal distribution with mean 0 and standard deviation 5?
+
+    ```{r}
+        x<-seq(-10,10,length=500)
+        y<-dnorm(x,0,5)
+        plot(x,y,type='l',ylim=c(0,.10) )
+    ```
+
+    ```         
+    Around .08
+    ```
+
+d.  If a random variable had a standard deviation of 0, what would that mean?
+
+    ```{r}
+        x<-seq(-10,10,length=500)
+        y<-dnorm(x,0,0)
+        plot(x,y,type='l',ylim=c(0,.10) )
+    ```
+
+    ```         
+    Every value is the same.
+    ```
+
+Now display five plots with $\sigma=1$ and $\mu=-3,-1,0,5,10$
+
+```{r}
+
+for (i in -3:11) {
+  if (i == -3)
+  {
+    x<-seq(-6,0,length=500)
+    y<-dnorm(x,i,1)
+    plot(x,y,type='l',ylim=c(0, 0.50) )
+  }
+  if (i == -1)
+  {
+    x<-seq(-4,2,length=500)
+    y<-dnorm(x,i,1)
+    plot(x,y,type='l',ylim=c(0, 0.50))
+  }
+  if(i == 0)
+  {
+    x<-seq(-5,5,length=500)
+    y<-dnorm(x,i,1)
+    plot(x,y,type='l', ylim=c(0, 0.50))
+  }
+    if(i == 5)
+  {
+    x<-seq(0,10,length=500)
+    y<-dnorm(x,i,1)
+    plot(x,y,type='l', ylim=c(0, 0.50))
+    }
+    if(i == 10)
+  {
+    x<-seq(5,15,length=500)
+    y<-dnorm(x,i,1)
+    plot(x,y,type='l', ylim=c(0, .50))
+  }
+}
+```
+
+Describe what happens to the probability density function as the mean increases.
+
+```         
+As the mean increases the mean of the distribution moves right on the x axis.
+```
+
+**End Assignment 1**
+
+Now that we understand how the parameters effect the probability density function lets look at calculating probabilities from a normal distribution.
+
+To find the value of the PDF at x we can use dnorm() as above. Therefore to find the value of the probaility density function $f(2)$ from a normal distribution with $\mu=0$ and $\sigma=1$ we would do the following:
+
+```{r}
+round(dnorm(2,0,1),5)
+```
+
+We are using the round feature to round our answer to five decimal places. feel free to increase this in any examples to see more decimal places.
+
+To find $P(X \leq x)$ we can use pnorm(). To find the $P(X \leq 2)$ for the standard Normal distribution we would do the following:
+
+```{r}
+round(pnorm(2,0,1),5)
+
+```
+
+Now in order to find $P(a \leq X \leq b)$ we can use pnorm and subtraction. To find $P(-2 \leq X \leq 2)$ for the standard normal distribution we would do the following:
+
+```{r}
+round(pnorm(2,0,1)-pnorm(-2,0,1),5)
+
+```
+
+Finally to find a value x such that $P(x \leq X)=a$ we can use qnorm. This is a way to find percentiles for a normal distribution. To find the 95th percentile for the standard normal distribution we would do th following:
+
+```{r}
+round(qnorm(.95,0,1),5)
+
+
+```
+
+### Assignment 2
+
+Using what we just learned complete the following:
+
+1.  Find the probability that a normal random variable with mean 68 and standard deviation 2.5 is between 64 and 70.
+
+round(pnorm(70,68,2.5)-pnorm(64,68,2.6),5)
+
+```{r}
+round(pnorm(70,68,2.5)-pnorm(64,68,2.6),5)
+```
+
+2.  Find a number x such that P(-x\<X\<x)=1.000. to do this guess a value for x and then check if the probability between x and -x is 1.
+
+```{r}
+
+round(pnorm(6,1,1)-pnorm(-6,1,1),5)
+```
+
+Now that we understand the theoretical Normal distribution a little better lets look at taking sample from a normal distribution and seeing how well it compares with the theoretical distribution. To do this we will use rnorm. to take a sample of size 25 from the standard normal distribution we would do the following:
+
+```{r}
+normal_sample_25<-rnorm(25,0,1)
+
+```
+
+We can now plot the histogram and superimpose the theoretical distribution:
+
+```{r}
+hist(normal_sample_25,freq = FALSE,main = "Normal Distribution with sample size 25",xlim=c(min(normal_sample_25)-1,max(normal_sample_25)+1))
+x<-seq(min(normal_sample_25),max(normal_sample_25),length=200)
+y<-dnorm(x,0,1)
+lines(x,y)
+```
+
+We will put this together in a function that you can use to finish the assignment below
+
+```{r}
+normal_dist_plot<-function(n,mu,sigma){
+  normal_sample<-rnorm(n,mu,sigma)
+  hist(normal_sample,freq=FALSE,main=paste('Normal dsitribution with sample size',n),xlim=c(min(normal_sample)-1,max(normal_sample)+1))
+  x<-seq(min(normal_sample),max(normal_sample),length=2000)
+  y<-dnorm(x,mu,sigma)
+  lines(x,y)
+}
+```
+
+Now use this function to take samples of n= 500, 100, and 1000
+
+```{r}
+normal_dist_plot(500, 0, 1)
+normal_dist_plot(100, 0, 1)
+normal_dist_plot(1000, 0, 1)
+
+```
+
+Compare the histograms of the three samples to the probability density function for the standard normal distribution.To Address how well the histograms compare to the probability density function and what seems to happen to the empirical histograms as the sample size increases.
+
+```         
+The histogram compares more and more with the PDF as the sample size increased. As the sample size increases the histograms seem to fit under the bell curve.
+```
+
+**End Assignment 2**
+
+## The Exponential Distribution
+
+The probability density function of an exponential random variable is:
+
+$f(x)= \lambda e^{-\lambda x}$ for $x \geq 0$
+
+Here $E(x)=\frac{1}{\lambda}=Var(x)$
+
+### Assignment 3
+
+1.  Using the above formula for $f(x)$ find $\lim_{x\to\infty} f(x)$
+
+    ```{r}
+
+    ```
+
+    ```         
+    As x approaches infinity the mean get smaller and smaller closer to 0.
+    ```
+
+2.Generate graphs of the probability density function from the exponential distribution with $E(x)=1,5$ and describe how the graph changes
+
+```{r}
+x <- seq(from = 0, to = 10, by = 0.01)
+plot(x, dexp(x, 1), type = "l", ylim=c(0,1))
+plot(x, dexp(x, 5), type = "l", ylim=c(0,5))
+```
+
+```         
+The graph with Lambda = 1 is a slow curve down to 0, where as when it equals 5 its a steep cuve down to 0.
+```
+
+3.  Find the probability $P(x<5<7)$ for an exponential random variable with mean 6
+
+```{r}
+
+
+
+pexp(5, rate = 1/6)
+pexp(7, rate = 1/6)
+
+```
+
+4.Select random samples of size 50, 100 and 10,000 from an exponential distribution with mean 1. You can create a function the same way as shown for the normal distribution, but this time use rexp() instead of rnorm().
+
+```{r}
+
+normal_dist_plot<-function(n, mu){
+  normal_sample<-rexp(n,mu)
+  hist(normal_sample,freq=FALSE,main=paste('Normal dsitribution with sample size',n),xlim=c(min(normal_sample)-1,max(normal_sample)+1))
+  x<-seq(min(normal_sample),max(normal_sample),length=2000)
+  y<-dexp(x,mu)
+  lines(x,y)
+}
+
+normal_dist_plot(50, 1)
+normal_dist_plot(100, 1)
+normal_dist_plot(10000, 1)
+```
+
+5.  Construct histograms for each of the samples and compare them with the probability density function of the exponential distribution with a mean of 1. How well do the histograms compare and what happens as the sample size increases?
+
+    ```         
+    The histograms become more comparable as sample size increases.
+    ```
+
+**End Assignment 3**
+
+## Real World Application
+
+### Assignment 4
+
+A. Find an example of normally distributed data. import the data into R and compare a histogram of the data to the appropriate normal distribution. Also, calculate a relevant probability and interpret it in the context of the problem.
+
+```{r}
+
+data1 <- read.csv("SOCR-HeightWeight.csv")
+
+x <- data1$Height
+
+normal_dist_plot_real<-function(mu,sigma){
+  normal_sample<-x
+  hist(normal_sample,freq=FALSE,main=paste('Normal dsitribution with sample size'),xlim=c(min(normal_sample)-1,max(normal_sample)+1))
+  x<-seq(min(normal_sample),max(normal_sample),length=2000)
+  y<-dnorm(x,mean(normal_sample),sd(normal_sample))
+  lines(x,y)
+}
+
+normal_dist_plot_real(0, 1)
+
+
+
+
+
+
+
+```
+
+```         
+```
+
+B. Do the same thing as above but for an exponential distribution.
+
+```{r}
+
+```
+
+```         
+```
+
+**End Assignment 4**

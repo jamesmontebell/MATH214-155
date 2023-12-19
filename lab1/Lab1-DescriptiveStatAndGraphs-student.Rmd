@@ -54,6 +54,7 @@ Recall the function read.csv. We would like to store the data into an object cal
 
 ```{r}
 data1 <- read.csv("Pulse.csv")
+data1
 ```
 
 You should be able to see the object "data1" appeared on the right-top part. You can double click the object "data1" to see the details of the data set.
@@ -78,6 +79,7 @@ In this part, we will learn how to obtain the numerical summary, or **descriptiv
 First, use the knowledge of Lab 0, obtain an object called "Height" that represent the variable "Height" in data1.
 
 ```{r}
+data1
 Height <- data1$Height
 Height
 ```
@@ -86,6 +88,7 @@ Let's first get some summary of this column. The function used is "summary".
 
 ```{r}
 summary(Height)
+summary(male)
 ```
 
 You can see the summary function with a quantitative column input will show the minimum, maximum, mean, median, first quartile, and third quartile.
@@ -162,7 +165,11 @@ Now, we can run the function using Height as the input. We also use "Descriptive
 
 ```{r}
 
-DesStat(Height, "Descriptive Statistics - Height - Your name")
+
+DesStat(MHeight,"Descriptive Statistics - Male Weight - James Montebell")
+
+DesStat(FHeight, "")
+DesStat(FWeight, "")
 ```
 
 ## Assignment 1
@@ -284,6 +291,13 @@ HeightCount <- set_caption(HeightCount, "Frequency Table of Height - Your Name")
 HeightCount
 save_as_docx(HeightCount,path="HeightCount.docx")
 
+WeightCount <- data1 %>% group_by(Weight) %>%
+  summarise(Count=n())
+WeightCount <- flextable(WeightCount)
+WeightCount <- set_caption(WeightCount, "Frequency Table of Height - Your Name")
+WeightCount
+save_as_docx(WeightCount,path="HeightCount.docx")
+
 ```
 
 In particular, we can do the grouping by multiple layers. For example, first group by Sex, then in each Sex, group by Height.
@@ -336,6 +350,9 @@ The resulting histogram for the Height of all students is thus given by:
 ```{r}
 
 ggplot(data1, aes(x=Height))+
+  geom_histogram(binwidth=1,color="black", fill="lightblue")
+
+ggplot(data1, aes(x=Weight))+
   geom_histogram(binwidth=1,color="black", fill="lightblue")
 ```
 
@@ -406,27 +423,64 @@ Answer the following questions:
 
 3.  What are the most frequent heights and weights of the students?
 
+    ```{r}
+    HeightCount <- data1 %>% group_by(Height) %>%
+      summarise(Count=n())
+    WeightCount <- data1 %>% group_by(Weight) %>%
+      summarise(Count=n())
+
+    HeightCount
+    WeightCount
+    ```
+
     ```         
+      66 is the most frequent hieght and 120 is the most frequent weight.
     ```
 
 4.  How many students have these heights and weights?
 
     ```         
+    8 students for the height and 120 for the weight.
     ```
 
 5.  What are the most frequent heights and weights of the Female students, and how many female students have these heights and weights?
 
+    ```{r}
+    HeightCount <- subset(data1, Sex == 'Female') %>% group_by(Sex, Height) %>%
+      summarise(Count=n())
+
+    WeightCount <- subset(data1, Sex == 'Female') %>% group_by(Sex, Weight) %>%
+      summarise(Count=n())
+
+
+    HeightCount
+    WeightCount
+    ```
+
     ```         
+    Most frequent female hieghts are 62, 63, 65, 66 and each have 4 females. Most frequent female weight is 125 and has 5 females.
     ```
 
 6.  By looking at the histogram what can be said about the heights and weights of the students? Does this agree with the results you found from the frequency tables?
 
+    ```{r}
+    ggplot(data1, aes(x=data1$Height))+
+      geom_histogram(binwidth=1,color="black", fill="lightblue")
+
+    ggplot(data1, aes(x=data1$Weight))+
+      geom_histogram(binwidth=1,color="black", fill="lightblue")
+
+    Weight
+    ```
+
     ```         
+    It shows that around the median of heights and weights there is a higher count students at that height and weight.
     ```
 
 7.  By looking at the histograms, what can be said about the heights and weights of females and males?
 
     ```         
+    It shows that a lot of males are taller and heavier than the tallest and heaviest female. This agrees with what I found because the average hieghts and weights of females are lower than the average for males.
     ```
 
 **End of Assignment 5**

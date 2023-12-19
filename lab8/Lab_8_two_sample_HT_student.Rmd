@@ -1,0 +1,586 @@
+---
+title: 'Lab 8: Comparing Two Population Means'
+author: "kgteller"
+date: "2023-06-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(BSDA)
+library(nortest)
+```
+
+# Lab 8: Comparing Two Population Means
+
+Today we are going to look at conducting hypothesis tests when we have two samples of data. Recall the steps we want to take when running a hypothesis test:
+
+1.  A description the null and alternative hypotheses in terms of the problem.
+
+2.  A statement of the null and alternative hypotheses in standard symbols.
+
+3.  The significance level (size of the Type I error), α, that will be tolerated.
+
+4.  The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+5.  A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+6.  A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+7.  A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+8.  Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+When we have two samples we need to first consider the relationship between the data. There are two different relationships we can have between the data:
+
+**Independent Samples**: A random sample of size $n_1$ is selected from the first population, and a random sample of size $n_2$ is selected *independently* from the second population. The null hypothesis usually is $\mu_1=\mu_2$ .Then $\bar{x}_1-\bar{x}_2$is calculated, but this time a *2-sample test* is used; there is no way to view the data as a single sample.
+
+When the sample sizes are small and the the both populations are not normal a Mann-Whitney test can sometimes be used. The Mann-Whitney test would be used if the two samples have a distribution with the same shape. in addition the Mann-Whitney test is not about $\mu_1$ and $\mu_2$, but about the population medians $\eta_1$ and $\eta_2$. so the two hypotheses become:
+
+$H_0: \eta_1=\eta_2 \\$ $H_1: \eta_1 \neq,\lt,\gt \eta_2$
+
+**Paired Samples** When the two samples have the same sample size and each data point in one sample can be *paired* with another data point in the other sample. The difference between the populations means is denoted $\mu_d=\mu_1-\mu_2$. Here the null hypothesis is that $\mu_d=0$. Now this can be treated as a single sample and a 1-sample hypothesis can br run on the **sample differences**.
+
+In order to run either of these tests we can use the t.test(), or wilcox.test() commands that we discussed in the previous lab.
+
+To run an independent 2-sample t-test we would use the following syntax: t.test(sample1,sample2)
+
+to run an independent Mann-whitney test we would use the following syntax: wilcox.test(sample1,sample2,alternative='two.sided','less','greater')
+
+To run a paired t-test we use the following syntax: t.test(sample1,sample2,paired=TRUE)
+
+for today's lab we will data from the pulse.csv. The data relates to a class of statistic students that measured their resting pulse (Pulse1) and then a random number of students ran in place while the others just stayed still. The pulses of the entire class were recorded again (Pulse2). Along with the pulse data other data was collected that included, height, weight, sex, and weather or not they smoked.
+
+For reference here is a more detailed summary of the data:
+
+In this data set, there are 8 variables:
+
+-   Pulse1: The resting pulse of each student
+-   Pulse2: The pulse after running or not running for each student (after treatment)
+-   Ran: Whether or not the student ran in place: 1=Yes or 2=No (treatment)
+-   Smokes: Whether or not the student smokes regularly: 1=Yes or 2=No
+-   Sex: The biological characteristics of males or females of the student: 1=M or 2=F
+-   Height: The height of the student, in inches
+-   Weight: The weight of the student, in pounds
+-   Activity: The usual activity level of the student: 1=Slight, 2=Moderate, or 3=A lot
+
+## Assignment 1
+
+create a data-frame and then create the following objects to answer each of the other assignments:
+
+|      Name      |                    Explanation of Name                    |
+|:--------------:|:---------------------------------------------------------:|
+|     Diffs      |                       Pulse1-Pulse2                       |
+|    Diffs_R     |          Pulse1 -- Pulse2 for Runners (Ran = 1)           |
+|   Diffs_notR   |        Pulse1 -- Pulse2 for non Runners (Ran = 2)         |
+|  Diffs_RandS   |   Pulse1 -- Pulse 2 for Runners who smoke (Smokes = 1)    |
+| Diffs_RandnotS | Pulse1 -- Pulse2 for Runners who don't smoke (Smokes = 2) |
+|    Weight_M    |                     Weights of males                      |
+|    Weight_F    |                    Weights of females                     |
+|   Weight_M_S   |                  Weights of male smokers                  |
+| Weight_M_notS  |                Weights of male non-smokers                |
+|   Weight_F_S   |                 Weights of female smokers                 |
+| Weight_F_notS  |               Weights of female non-smokers               |
+
+```{r}
+data
+data<-read.csv("Pulse.csv")
+Diffs<-data["Pulse1"] - data["Pulse2"]
+Diffs_R<-data$Pulse1[data$Ran == 1] - data$Pulse2[data$Ran == 1]
+Diffs_notR<-data$Pulse1[data$Ran == 2] - data$Pulse2[data$Ran == 2]
+Diffs_RandS<-data$Pulse1[data$Smokes == 1] - data$Pulse2[data$Smokes == 1]
+Diffs_RandnotS<-data$Pulse1[data$Smokes == 2] - data$Pulse2[data$Smokes == 2]
+Weight_M<-data$Weight[data$Sex==1]
+Weight_F<-data$Weight[data$Sex==2]
+Weight_M_S<-data$Weight[data$Sex==1 & data$Smokes==1]
+Weight_M_notS<-data$Weight[data$Sex==1 & data$Smokes==2]
+Weight_F_S<-data$Weight[data$Sex==2 & data$Smokes==1]
+Weight_F_notS<-data$Weight[data$Sex==2 & data$Smokes==2]
+
+```
+
+**End Assignment 1**
+
+## Assignment 2
+
+A researcher wants to test the hypothesis that the average pulse of the class was greater the second time around than the first time. Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above.
+
+```{r}
+result <- t.test(data$Pulse1, data$Pulse2, paired = TRUE, alternative = "greater")
+result
+p_value <- result$p.value
+p_value
+
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean pulse is the mean of pulse1 and the alternative is the mean pulse is greater than pulse1 in pulse2
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(pulse1-pulse2)
+n1: mean > avg(pulse1-pulse2)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, paired
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Fail to reject the null hypothesis. P-value = 0.999999
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is no significant evidence that the average pulse after is greater
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 2
+```
+
+**End Assignment 2**
+
+Now it probably makes sense to separate the class into two groups, the runners and the non-runners.
+
+## Assignment 3
+
+A researcher now wants to look at the pulses of the running group before and after to conclude whether or not running in place increases mean heart rate. Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above.
+
+```{r}
+result <- t.test(Diffs_R)
+p_value <- result$p.value
+alpha <- 0.05
+if (p_value <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that running in place has an effect on mean heart rate.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude an effect of running in place on mean heart rate.")
+}
+
+p_value
+
+
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean pulse is the mean of pulse1 and the alternative is the mean pulse is greater than pulse1 in pulse2
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(pulse1-pulse2)
+n1: mean > avg(pulse1-pulse2)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Reject the null hypothesis. P-value = 1.26473
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is evidence that running in place has an effect on mean heart rate
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 1
+```
+
+**End Assignment 3**
+
+## Assignment 4
+
+A researcher now wants to run the same hypothesis as before but with the non-runners to see if there is any difference in mean heart rate. Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above.
+
+```{r}
+result <- t.test(Diffs_notR)
+p_value <- result$p.value
+alpha <- 0.05
+if (p_value <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that running in place has an effect on mean heart rate.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude an effect of running in place on mean heart rate.")
+}
+
+p_value
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean pulse is the mean of pulse1 and the alternative is the mean pulse is greater than pulse1 in pulse2
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(pulse1-pulse2)
+n1: mean != avg(pulse1-pulse2)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Fail to reject the null hypothesis. P-value = 0.8492061
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is not enough evidence to conclude an effect of running in place on mean heart rate
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 2
+```
+
+**End Assignment 4**
+
+## Assignment 5
+
+Now among the runners there could be another factor that affects the average heart rate. This confounding factor could be smoking. Therefore the researcher wants to know does the mean heart rate of smokers increase after running in place? Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above. You may have a small sample size and it is non-normal you may have to use the Wilcoxon or Sign tests discussed in the previous lab.
+
+```{r}
+result_smokers <- wilcox.test(Diffs_RandS)
+
+result_smokers
+p_value_smokers <- result_smokers$p.value
+
+alpha <- 0.05
+if (p_value_smokers <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that running in place affects mean heart rate for smokers.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude an effect of running in place on mean heart rate for smokers.")
+}
+
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean pulse is the mean of pulse1 and the alternative is the mean pulse is greater than pulse1 in pulse2
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(pulse1-pulse2)
+n1: mean > avg(pulse1-pulse2)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Reject the null hypothesis. P-value =0.009029
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is evidence that running in place affects mean heart rate for smokers.
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 1
+```
+
+**End Assignment 5**
+
+## Assignment 6
+
+Now to make a comparison the next hypothesis would be does running in place increase the mean heart rate of non-smokers? Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above.
+
+```{r}
+
+
+result_non_smokers <- wilcox.test(Diffs_RandnotS)
+result_non_smokers
+p_value_non_smokers <- result_non_smokers$p.value
+
+alpha <- 0.05
+if (p_value_non_smokers <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that running in place affects mean heart rate for non-smokers.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude an effect of running in place on mean heart rate for non-smokers.")
+}
+
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean pulse is the mean of pulse1 and the alternative is the mean pulse is greater than pulse1 in pulse2
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(pulse1-pulse2)
+n1: mean > avg(pulse1-pulse2)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Reject the null hypothesis. P-value =0.0003919
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is evidence that running in place affects mean heart rate for non-smokers.
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 1
+```
+
+**End Assignment 6**
+
+## Assignment 7
+
+Now a researcher is interested in the weights of the class. They want to determine whether the weights of males and females differ.Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above. ( if using a non-parametric test remember to state the conclusion in terms of means and not medians)
+
+```{r}
+
+length(Weight_M)
+length(Weight_F)
+
+Weight_M<-Weight_M[1:35]
+paired_t_test_result <- t.test(Weight_M, Weight_F, paired = TRUE)
+
+alpha <- 0.05
+paired_t_test_result$p.value
+if (paired_t_test_result$p.value <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that the mean weights of males and females differ.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude a difference in mean weights between males and females.")
+}
+
+
+
+
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean weight of males and females are equal, the alternative is that they differ
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(weight)
+n1: mean != avg(weight)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+t test, large sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Reject the null hypothesis. P-value =8.739817
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is evidence that the mean weights of males and females differ.
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 1
+```
+
+**End Assignment 7**
+
+## Assignment 8
+
+Going a little deeper into the data a researcher thinks that smoking might have an effect on weight. The researcher wants to test the hypothesis about whether the mean weight of males who smoke is different from males who do not smoke. Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above. ( if using a non-parametric test remember to state the conclusion in terms of means and not medians)
+
+```{r}
+length(Weight_M_S)
+length(Weight_M_notS)
+
+wilcox_test_result <- wilcox.test(Weight_M_S, Weight_M_notS[1:20])
+
+p_value_wilcox_test <- wilcox_test_result$p.value
+
+wilcox_test_result
+
+
+alpha <- 0.05
+if (p_value_wilcox_test <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that the mean weights of male smokers and male non-smokers differ.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude a difference in mean weights between male smokers and male non-smokers.")
+}
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean weight of males who dont smoke and smoke are equal, the alternative is that they differ
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(males who dont smoke)
+n1: mean != avg(males who dont smoke)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+wilcox, small sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Fail to reject the null hypothesis. P-value =0.6939
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is not enough evidence to conclude a difference in mean weights between male smokers and male non-smokers.
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 2
+```
+
+**End Assignment 8**
+
+## Assignment 9
+
+The last hypothesis that the researcher want to test is whether the mean weight of females who smoke is different from females who do not smoke. Conduct the appropriate test to test this hypothesis and clearly state your conclusion following the 8 steps described above. ( if using a non-parametric test remember to state the conclusion in terms of means and not medians)
+
+```{r}
+
+length(Weight_F_S)
+length(Weight_F_notS)
+
+wilcox_test_result <- wilcox.test(Weight_F_S, Weight_F_notS[1:8])
+
+p_value_wilcox_test <- wilcox_test_result$p.value
+
+wilcox_test_result
+
+
+alpha <- 0.05
+if (p_value_wilcox_test <= alpha) {
+  cat("Reject the null hypothesis. There is evidence that the mean weights of female smokers and female non-smokers differ.")
+} else {
+  cat("Fail to reject the null hypothesis. There is not enough evidence to conclude a difference in mean weights between female smokers and female non-smokers.")
+}
+```
+
+```         
+A description the null and alternative hypotheses in terms of the problem.
+
+Null hypotheses is that the mean weight of females who dont smoke and smoke are equal, the alternative is that they differ
+
+A statement of the null and alternative hypotheses in standard symbols.
+
+
+n0: mean =  avg(females who dont smoke)
+n1: mean != avg(females who dont smoke)
+
+The significance level (size of the Type I error), α, that will be tolerated.
+
+.95
+
+
+The name of the statistical test to be used and the assumptions required in order for the test to be valid. (i.e. small sample size, not approximately normal, paired, independent, etc.)
+
+wilcox, small sample, normal, 
+
+A clear description of exactly what the decision rule is; i.e. under what circumstances is the null hypothesis rejected.
+
+null hypo rejected if pvalue less than alpha
+
+A clear statement indicating whether or not you actually reject H0. This decision must be linked to the numerical value of p actually observed and the value of α.
+
+Fail to reject the null hypothesis.  P-value =0.6733
+
+A very clear description of what was actually decided in the context of the original problem. For example, if the problem is about mean airfares between two cities, simply saying reject Ho is not good enough; you need to say what this decision means as it applies to mean airfares.
+
+There is not enough evidence to conclude a difference in mean weights between female smokers and female non-smokers.
+
+Any statistical decision method is subject to Type I or Type II error. Discuss which type is possible in your final decision and if possible, its probability.
+
+type 2
+```
+
+**End Assignment 9**
+
+## Conclusion assignment
+
+Based on the hypotheses you have tested and there results write a concluding paragraph or more about your findings:
+
+```         
+The findings show that pulse is very directly linked to how much someone weights and their smoking habits.
+```
+
+**End Conclusion Assignment**

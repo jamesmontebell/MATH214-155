@@ -272,7 +272,7 @@ Another advantages of R Markdown is that it can present our study/research repor
 9.  Only display the names, Areas, and Population for all the states in the region "Northeast" AND have populations \>5000.
 
     ```{r}
-    select(subset(data1, Region = "Northeast" & Population > 5000),Name, Area, Population)
+    select(subset(data1, Region == "Northeast" & Population > 5000),Name, Area, Population)
     ```
 
 10. Store the results of question 9 in a new object NEstates, then display that object using kable function
